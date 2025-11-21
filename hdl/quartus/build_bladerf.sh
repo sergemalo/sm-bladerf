@@ -153,6 +153,138 @@ check_quartus_version()
     return 0
 }
 
+QSYS_SCRIPT_CMD=""
+QSYS_GENERATE_CMD=""
+NIOS2_BSP_CREATE_SETTINGS_CMD=""
+IP_GENERATE_CMD=""
+
+find_qsys_tools()
+{
+    local qsys_script_cmd
+    qsys_script_cmd=$(command -v qsys-script 2>/dev/null || true)
+
+    local qsys_generate_cmd
+    qsys_generate_cmd=$(command -v qsys-generate 2>/dev/null || true)
+
+    local -a qsys_search_paths=()
+
+    if [ -z "$qsys_script_cmd" ] || [ -z "$qsys_generate_cmd" ]; then
+        if [ -n "$QUARTUS_ROOTDIR" ]; then
+            if [ -d "${QUARTUS_ROOTDIR}/sopc_builder/bin" ]; then
+                qsys_search_paths+=("${QUARTUS_ROOTDIR}/sopc_builder/bin")
+            fi
+
+            if [ -d "${QUARTUS_ROOTDIR}/../qsys/bin" ]; then
+                qsys_search_paths+=("${QUARTUS_ROOTDIR}/../qsys/bin")
+            fi
+        fi
+
+        for candidate_dir in "${qsys_search_paths[@]}"; do
+            if [ -z "$qsys_script_cmd" ] && \
+                   [ -x "${candidate_dir}/qsys-script" ]; then
+                qsys_script_cmd="${candidate_dir}/qsys-script"
+            fi
+
+            if [ -z "$qsys_generate_cmd" ] && \
+                   [ -x "${candidate_dir}/qsys-generate" ]; then
+                qsys_generate_cmd="${candidate_dir}/qsys-generate"
+            fi
+
+            if [ -n "$qsys_script_cmd" ] && \
+                   [ -n "$qsys_generate_cmd" ]; then
+                break
+            fi
+        done
+    fi
+
+    if [ -n "$qsys_script_cmd" ] && [ -n "$qsys_generate_cmd" ]; then
+        QSYS_SCRIPT_CMD="$qsys_script_cmd"
+        QSYS_GENERATE_CMD="$qsys_generate_cmd"
+        return 0
+    fi
+
+    return 1
+}
+
+find_nios2_tools()
+{
+    local nios2_bsp_cmd
+    nios2_bsp_cmd=$(command -v nios2-bsp-create-settings 2>/dev/null || true)
+
+    local -a nios2_search_paths=()
+
+    if [ -z "$nios2_bsp_cmd" ]; then
+        if [ -n "$NIOS2EDS_ROOTDIR" ]; then
+            if [ -d "${NIOS2EDS_ROOTDIR}/bin" ]; then
+                nios2_search_paths+=("${NIOS2EDS_ROOTDIR}/bin")
+            fi
+            if [ -d "${NIOS2EDS_ROOTDIR}/sdk2/bin" ]; then
+                nios2_search_paths+=("${NIOS2EDS_ROOTDIR}/sdk2/bin")
+            fi
+        fi
+
+        if [ -n "$QUARTUS_ROOTDIR" ]; then
+            if [ -d "${QUARTUS_ROOTDIR}/../nios2eds/bin" ]; then
+                nios2_search_paths+=("${QUARTUS_ROOTDIR}/../nios2eds/bin")
+            fi
+
+            if [ -d "${QUARTUS_ROOTDIR}/../nios2eds/sdk2/bin" ]; then
+                nios2_search_paths+=("${QUARTUS_ROOTDIR}/../nios2eds/sdk2/bin")
+            fi
+        fi
+
+        for candidate_dir in "${nios2_search_paths[@]}"; do
+            if [ -x "${candidate_dir}/nios2-bsp-create-settings" ]; then
+                nios2_bsp_cmd="${candidate_dir}/nios2-bsp-create-settings"
+                break
+            fi
+        done
+    fi
+
+    if [ -n "$nios2_bsp_cmd" ]; then
+        NIOS2_BSP_CREATE_SETTINGS_CMD="$nios2_bsp_cmd"
+        return 0
+    fi
+
+    return 1
+}
+
+find_ip_generate_tool()
+{
+    local ip_generate_cmd
+    ip_generate_cmd=$(command -v ip-generate 2>/dev/null || true)
+
+    local -a ip_search_paths=()
+
+    if [ -z "$ip_generate_cmd" ] && [ -n "$QUARTUS_ROOTDIR" ]; then
+        if [ -d "${QUARTUS_ROOTDIR}/sopc_builder/bin" ]; then
+            ip_search_paths+=("${QUARTUS_ROOTDIR}/sopc_builder/bin")
+        fi
+
+        if [ -d "${QUARTUS_ROOTDIR}/../qsys/bin" ]; then
+            ip_search_paths+=("${QUARTUS_ROOTDIR}/../qsys/bin")
+        fi
+
+        if [ -d "${QUARTUS_ROOTDIR}/../ip/altera/common/bin" ]; then
+            ip_search_paths+=("${QUARTUS_ROOTDIR}/../ip/altera/common/bin")
+        fi
+    fi
+
+    for candidate_dir in "${ip_search_paths[@]}"; do
+        if [ -x "${candidate_dir}/ip-generate" ]; then
+            ip_generate_cmd="${candidate_dir}/ip-generate"
+            break
+        fi
+    done
+
+    if [ -n "$ip_generate_cmd" ]; then
+        IP_GENERATE_CMD="$ip_generate_cmd"
+        return 0
+    fi
+
+    return 1
+}
+
 if [ $# -eq 0 ]; then
     usage
     exit 0
@@ -348,16 +480,45 @@ if [ $? -ne 0 ] || [ ! -f "$quartus_check" ]; then
 fi
 
 # Check for Qsys
-qsys_check="`which qsys-generate`"
-if [ $? -ne 0 ] || [ ! -f "$qsys_check" ]; then
-    echo -e "\nError: Qsys (SOPC builder 'bin' directory) does not appear to be in your PATH.\n" >&2
+if ! find_qsys_tools; then
+    echo -e "\nError: Could not locate qsys-generate/qsys-script. Ensure Quartus is installed and QUARTUS_ROOTDIR points to it.\n" >&2
     exit 1
 fi
 
+# Check for Quartus IP generation tool
+if ! find_ip_generate_tool; then
+    echo -e "\nError: Could not locate ip-generate. Ensure Quartus IP components are installed and QUARTUS_ROOTDIR points to the installation.\n" >&2
+    exit 1
+fi
+ip_generate_dir="$(dirname "$IP_GENERATE_CMD")"
+if [[ ":${PATH}:" != *":${ip_generate_dir}:"* ]]; then
+    export PATH="${ip_generate_dir}:$PATH"
+fi
+
 # Check for Nios II SDK
-nios2_check="`which nios2-bsp-create-settings`"
-if [ $? -ne 0 ] || [ ! -f "$nios2_check" ]; then
-    echo -e "\nError: Nios II SDK (nios2eds 'bin' directory) does not appear to be in your PATH.\n" >&2
+if ! find_nios2_tools; then
+    echo -e "\nError: Could not locate nios2-bsp-create-settings. Ensure the Nios II EDS is installed and that QUARTUS_ROOTDIR or NIOS2EDS_ROOTDIR is set.\n" >&2
+    exit 1
+fi
+nios2_bin_dir="$(dirname "$NIOS2_BSP_CREATE_SETTINGS_CMD")"
+nios2_root_dir="$(cd "${nios2_bin_dir}/.." && pwd)"
+if [ ! -f "${nios2_root_dir}/bin/sh_pl.sh" ]; then
+    nios2_root_dir="$(cd "${nios2_root_dir}/.." && pwd)"
+fi
+if [[ ":${PATH}:" != *":${nios2_bin_dir}:"* ]]; then
+    export PATH="${nios2_bin_dir}:$PATH"
+fi
+if [ -z "$SOPC_KIT_NIOS2" ]; then
+    export SOPC_KIT_NIOS2="${nios2_root_dir}"
+fi
+
+if ! command -v nios2-elf-gcc >/dev/null 2>&1; then
+    echo -e "\nError: Could not locate nios2-elf-gcc. Ensure the Nios II toolchain is installed and its 'bin' directory is on your PATH.\n" >&2
+    exit 1
+fi
+
+if ! command -v cmake >/dev/null 2>&1; then
+    echo -e "\nError: Could not locate cmake. Install CMake and ensure it is in your PATH before continuing.\n" >&2
     exit 1
 fi
 
@@ -421,7 +582,7 @@ else
     cmd="${cmd}; set nios_impl ${nios_rev}"
     cmd="${cmd}; set ram_size $(get_qsys_ram $size)"
     cmd="${cmd}; set platform_revision ${rev}"
-    qsys-script \
+    "${QSYS_SCRIPT_CMD}" \
         --script=${build_dir}/nios_system.tcl \
         --cmd="${cmd}"
 fi
@@ -433,7 +594,7 @@ fi
 if [ -f nios_system.sopcinfo ]; then
     echo "Skipping qsys-generate, nios_system.sopcinfo already exists"
 else
-    qsys-generate --synthesis=Verilog nios_system.qsys
+    "${QSYS_GENERATE_CMD}" --synthesis=Verilog nios_system.qsys
 fi
 
 echo ""
@@ -446,7 +607,7 @@ mkdir -p bladeRF_nios_bsp
 if [ -f settings.bsp ]; then
     echo "Skipping creating Nios BSP, settings.bsp already exists"
 else
-    nios2-bsp-create-settings \
+    "${NIOS2_BSP_CREATE_SETTINGS_CMD}" \
         --settings settings.bsp \
         --type hal \
         --bsp-dir bladeRF_nios_bsp \

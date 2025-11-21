@@ -1,3 +1,27 @@
+# Notes from Serge
+## 1 Pre-requisites
+As indicated below, you need to install "Quartus Prime Lite Edition v20.1.1". Make sure to install all Nios II packages.  
+You will also need cmake (nad maybe a few other regular utils to install with apt)
+
+## 1.1 Env vars
+I need to add the following lines to my .bashrc file:
+```
+export QSYS_ROOTDIR="/home/serge/intelFPGA_lite/20.1/quartus/sopc_builder/bin"
+export QUARTUS_ROOTDIR="$HOME/intelFPGA_lite/20.1/quartus"
+export NIOS2EDS_ROOTDIR="$HOME/intelFPGA_lite/20.1/nios2eds/"
+export PATH="$QUARTUS_ROOTDIR/bin:$PATH"
+export PATH="$NIOS2EDS_ROOTDIR/bin:$PATH"
+export PATH="$NIOS2EDS_ROOTDIR/bin/gnu/H-x86_64-pc-linux-gnu/bin:$PATH"
+```
+
+## 1.2 Modifications to build.sh
+I totally "vide-coded" the modifications you can see in the first commit to ```build_bladerf.sh```.  
+I simply loaded the repo into VS Code (v >= 1.106) with OpenAI Codex - It fixed the script for me.  
+
+-----
+-----
+
+
 # bladeRF HDL Source #
 The Cyclone FPGA is at the heart of the bladeRF.  It interfaces to the Cypress FX3, Analog Devices AD9361 (bladeRF 2.0 micro) or Lime Micro LMS6002D (bladeRF 1) RF transceiver, Silicon Labs clock generator chip, and VCTCXO trim DAC.  It has an input to read NMEA from a GPS as well as a 1pps input for time synchronization of signals and has a reference input for a reference clock to tame the VCTCXO.  Lastly, it connects directly to the expansion header for controlling GPIO or any other interfaces that may reside on the expansion board.
 
