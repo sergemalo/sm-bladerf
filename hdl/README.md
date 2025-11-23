@@ -1,7 +1,7 @@
 # Notes from Serge
 ## 1 Pre-requisites
-As indicated below, you need to install "Quartus Prime Lite Edition v20.1.1". Make sure to install all Nios II packages.  
-You will also need cmake (nad maybe a few other regular utils to install with apt)
+As indicated below, you need to install "Quartus Prime Lite Edition v20.1.1". Make sure to install all Nios II packages.
+You will also need cmake (and maybe a few other regular utils to install with apt)
 
 ## 1.1 Env vars
 I need to add the following lines to my .bashrc file:
@@ -15,8 +15,8 @@ export PATH="$NIOS2EDS_ROOTDIR/bin/gnu/H-x86_64-pc-linux-gnu/bin:$PATH"
 ```
 
 ## 1.2 Modifications to build.sh
-I totally "vide-coded" the modifications you can see in the first commit to ```build_bladerf.sh```.  
-I simply loaded the repo into VS Code (v >= 1.106) with OpenAI Codex - It fixed the script for me.  
+I totally "vibe-coded" the modifications you can see in the first commit to ```build_bladerf.sh```.
+I simply loaded the repo into VS Code (v >= 1.106) with OpenAI Codex - It fixed the script for me.
 
 -----
 -----
