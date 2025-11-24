@@ -817,7 +817,7 @@ w_1_q_export => w1q,
         end loop;
     end process;
 
-    process(rx_clock)
+    process(rx_clock,rx_reset)
     begin
         if( rx_reset = '1' ) then
             adc_streams_last_v  <= ( others => '0' ) ;

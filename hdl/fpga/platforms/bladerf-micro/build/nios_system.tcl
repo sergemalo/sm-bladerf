@@ -714,6 +714,21 @@ if { $platform_revision == "iurie" } {
     set_instance_parameter_value w_1_i {simDrivenValue} {0.0}
     set_instance_parameter_value w_1_i {width} {32}
 
+    add_interface w_1_i conduit end
+    set_interface_property w_1_i EXPORT_OF w_1_i.external_connection
+
+    add_connection nios2.data_master w_1_i.s1
+    set_connection_parameter_value nios2.data_master/w_1_i.s1 arbitrationPriority {1}
+    set_connection_parameter_value nios2.data_master/w_1_i.s1 baseAddress {0x40000}
+    set_connection_parameter_value nios2.data_master/w_1_i.s1 defaultConnection {0}
+
+    add_connection system_clock.clk w_1_i.clk
+
+    add_connection system_clock.clk_reset w_1_i.reset
+
+
+################################################################################
+
     add_instance w_1_q altera_avalon_pio
     set_instance_parameter_value w_1_q {bitClearingEdgeCapReg} {0}
     set_instance_parameter_value w_1_q {bitModifyingOutReg} {0}
@@ -727,27 +742,16 @@ if { $platform_revision == "iurie" } {
     set_instance_parameter_value w_1_q {simDrivenValue} {0.0}
     set_instance_parameter_value w_1_q {width} {32}
 
-
-    add_interface w_1_i conduit end
-    set_interface_property w_1_i EXPORT_OF w_1_i.external_connection
     add_interface w_1_q conduit end
     set_interface_property w_1_q EXPORT_OF w_1_q.external_connection
 
-
-    add_connection nios2.data_master w_1_i.s1
-    set_connection_parameter_value nios2.data_master/w_1_i.s1 arbitrationPriority {1}
-    set_connection_parameter_value nios2.data_master/w_1_i.s1 baseAddress {0x40000}
-    set_connection_parameter_value nios2.data_master/w_1_i.s1 defaultConnection {0}
-
     add_connection nios2.data_master w_1_q.s1
     set_connection_parameter_value nios2.data_master/w_1_q.s1 arbitrationPriority {1}
-    set_connection_parameter_value nios2.data_master/w_1_q.s1 baseAddress {0x40004}
+    set_connection_parameter_value nios2.data_master/w_1_q.s1 baseAddress {0x40010}
     set_connection_parameter_value nios2.data_master/w_1_q.s1 defaultConnection {0}
 
-    add_connection system_clock.clk w_1_i.clk
     add_connection system_clock.clk w_1_q.clk
 
-    add_connection system_clock.clk_reset w_1_i.reset
     add_connection system_clock.clk_reset w_1_q.reset
 }
 
