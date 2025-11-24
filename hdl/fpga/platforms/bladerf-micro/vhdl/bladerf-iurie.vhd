@@ -164,7 +164,7 @@ architecture iurie_bladerf of bladerf is
 
     constant MAGICAL_WEIGHT_SIZE         : natural := 32;
 
-    signal w1i       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0); -- TODO default 1.
+    signal w1i       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0);
     signal w1q       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0);
     signal w2i       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0);
     signal w2q       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0);
@@ -172,117 +172,111 @@ architecture iurie_bladerf of bladerf is
     signal w3q       : std_logic_vector(MAGICAL_WEIGHT_SIZE-1 downto 0);
 
  -- override nios_system from bladerf_p
-  component nios_system is
-        port (
-            ad9361_adc_i0_enable            : out std_logic;                                        -- enable
-            ad9361_adc_i0_valid             : out std_logic;                                        -- valid
-            ad9361_adc_i0_data              : out std_logic_vector(15 downto 0);                    -- data
-            ad9361_adc_i1_enable            : out std_logic;                                        -- enable
-            ad9361_adc_i1_valid             : out std_logic;                                        -- valid
-            ad9361_adc_i1_data              : out std_logic_vector(15 downto 0);                    -- data
-            ad9361_adc_overflow_ovf         : in  std_logic                     := 'X';             -- ovf
-            ad9361_adc_q0_enable            : out std_logic;                                        -- enable
-            ad9361_adc_q0_valid             : out std_logic;                                        -- valid
-            ad9361_adc_q0_data              : out std_logic_vector(15 downto 0);                    -- data
-            ad9361_adc_q1_enable            : out std_logic;                                        -- enable
-            ad9361_adc_q1_valid             : out std_logic;                                        -- valid
-            ad9361_adc_q1_data              : out std_logic_vector(15 downto 0);                    -- data
-            ad9361_adc_underflow_unf        : in  std_logic                     := 'X';             -- unf
-            ad9361_dac_i0_enable            : out std_logic;                                        -- enable
-            ad9361_dac_i0_valid             : out std_logic;                                        -- valid
-            ad9361_dac_i0_data              : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
-            ad9361_dac_i1_enable            : out std_logic;                                        -- enable
-            ad9361_dac_i1_valid             : out std_logic;                                        -- valid
-            ad9361_dac_i1_data              : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
-            ad9361_dac_overflow_ovf         : in  std_logic                     := 'X';             -- ovf
-            ad9361_dac_q0_enable            : out std_logic;                                        -- enable
-            ad9361_dac_q0_valid             : out std_logic;                                        -- valid
-            ad9361_dac_q0_data              : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
-            ad9361_dac_q1_enable            : out std_logic;                                        -- enable
-            ad9361_dac_q1_valid             : out std_logic;                                        -- valid
-            ad9361_dac_q1_data              : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
-            ad9361_dac_sync_in_sync         : in  std_logic                     := 'X';             -- sync
-            ad9361_dac_sync_out_sync        : out std_logic;                                        -- sync
-            ad9361_dac_underflow_unf        : in  std_logic                     := 'X';             -- unf
-            ad9361_data_clock_clk           : out std_logic;                                        -- clk
-            ad9361_data_reset_reset         : out std_logic;                                        -- reset
-            ad9361_device_if_rx_clk_in_p    : in  std_logic                     := 'X';             -- rx_clk_in_p
-            ad9361_device_if_rx_clk_in_n    : in  std_logic                     := 'X';             -- rx_clk_in_n
-            ad9361_device_if_rx_frame_in_p  : in  std_logic                     := 'X';             -- rx_frame_in_p
-            ad9361_device_if_rx_frame_in_n  : in  std_logic                     := 'X';             -- rx_frame_in_n
-            ad9361_device_if_rx_data_in_p   : in  std_logic_vector(5 downto 0)  := (others => 'X'); -- rx_data_in_p
-            ad9361_device_if_rx_data_in_n   : in  std_logic_vector(5 downto 0)  := (others => 'X'); -- rx_data_in_n
-            ad9361_device_if_tx_clk_out_p   : out std_logic;                                        -- tx_clk_out_p
-            ad9361_device_if_tx_clk_out_n   : out std_logic;                                        -- tx_clk_out_n
-            ad9361_device_if_tx_frame_out_p : out std_logic;                                        -- tx_frame_out_p
-            ad9361_device_if_tx_frame_out_n : out std_logic;                                        -- tx_frame_out_n
-            ad9361_device_if_tx_data_out_p  : out std_logic_vector(5 downto 0);                     -- tx_data_out_p
-            ad9361_device_if_tx_data_out_n  : out std_logic_vector(5 downto 0);                     -- tx_data_out_n
-            arbiter_request                 : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- request
-            arbiter_granted                 : out std_logic_vector(1 downto 0);                     -- granted
-            arbiter_ack                     : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- ack
-            clk_clk                         : in  std_logic                     := 'X';             -- clk
-            command_serial_in               : in  std_logic                     := 'X';             -- serial_in
-            command_serial_out              : out std_logic;                                        -- serial_out
-            dac_MISO                        : in  std_logic                     := 'X';             -- MISO
-            dac_MOSI                        : out std_logic;                                        -- MOSI
-            dac_SCLK                        : out std_logic;                                        -- SCLK
-            dac_SS_n                        : out std_logic_vector(1 downto 0);                     -- SS_n
-            gpio_in_port                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- in_port
-            gpio_out_port                   : out std_logic_vector(31 downto 0);                    -- out_port
-            gpio_rffe_0_in_port             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- in_port
-            gpio_rffe_0_out_port            : out std_logic_vector(31 downto 0);                    -- out_port
-            oc_i2c_scl_pad_o                : out std_logic;                                        -- scl_pad_o
-            oc_i2c_scl_padoen_o             : out std_logic;                                        -- scl_padoen_o
-            oc_i2c_sda_pad_i                : in  std_logic                     := 'X';             -- sda_pad_i
-            oc_i2c_sda_pad_o                : out std_logic;                                        -- sda_pad_o
-            oc_i2c_sda_padoen_o             : out std_logic;                                        -- sda_padoen_o
-            oc_i2c_arst_i                   : in  std_logic                     := 'X';             -- arst_i
-            oc_i2c_scl_pad_i                : in  std_logic                     := 'X';             -- scl_pad_i
-            reset_reset_n                   : in  std_logic                     := 'X';             -- reset_n
-            rx_tamer_ts_sync_in             : in  std_logic                     := 'X';             -- ts_sync_in
-            rx_tamer_ts_sync_out            : out std_logic;                                        -- ts_sync_out
-            rx_tamer_ts_pps                 : in  std_logic                     := 'X';             -- ts_pps
-            rx_tamer_ts_clock               : in  std_logic                     := 'X';             -- ts_clock
-            rx_tamer_ts_reset               : in  std_logic                     := 'X';             -- ts_reset
-            rx_tamer_ts_time                : out std_logic_vector(63 downto 0);                    -- ts_time
-            rx_trigger_ctl_in_port          : in  std_logic_vector(7 downto 0)  := (others => 'X'); -- in_port
-            rx_trigger_ctl_out_port         : out std_logic_vector(7 downto 0);                     -- out_port
-            spi_MISO                        : in  std_logic                     := 'X';             -- MISO
-            spi_MOSI                        : out std_logic;                                        -- MOSI
-            spi_SCLK                        : out std_logic;                                        -- SCLK
-            spi_SS_n                        : out std_logic;                                        -- SS_n
-            tx_tamer_ts_sync_in             : in  std_logic                     := 'X';             -- ts_sync_in
-            tx_tamer_ts_sync_out            : out std_logic;                                        -- ts_sync_out
-            tx_tamer_ts_pps                 : in  std_logic                     := 'X';             -- ts_pps
-            tx_tamer_ts_clock               : in  std_logic                     := 'X';             -- ts_clock
-            tx_tamer_ts_reset               : in  std_logic                     := 'X';             -- ts_reset
-            tx_tamer_ts_time                : out std_logic_vector(63 downto 0);                    -- ts_time
-            tx_trigger_ctl_in_port          : in  std_logic_vector(7 downto 0)  := (others => 'X'); -- in_port
-            tx_trigger_ctl_out_port         : out std_logic_vector(7 downto 0);                     -- out_port
-            wbm_wb_clk_i                    : in  std_logic                     := 'X';             -- wb_clk_i
-            wbm_wb_rst_i                    : in  std_logic                     := 'X';             -- wb_rst_i
-            wbm_wb_adr_o                    : out std_logic_vector(31 downto 0);                    -- wb_adr_o
-            wbm_wb_dat_o                    : out std_logic_vector(31 downto 0);                    -- wb_dat_o
-            wbm_wb_dat_i                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- wb_dat_i
-            wbm_wb_we_o                     : out std_logic;                                        -- wb_we_o
-            wbm_wb_sel_o                    : out std_logic;                                        -- wb_sel_o
-            wbm_wb_stb_o                    : out std_logic;                                        -- wb_stb_o
-            wbm_wb_ack_i                    : in  std_logic                     := 'X';             -- wb_ack_i
-            wbm_wb_cyc_o                    : out std_logic;                                        -- wb_cyc_o
-            xb_gpio_in_port                 : in  std_logic_vector(31 downto 0) := (others => 'X'); -- in_port
-            xb_gpio_out_port                : out std_logic_vector(31 downto 0);                    -- out_port
-            xb_gpio_dir_export              : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_export    : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_1_export  : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_2_export  : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_3_export  : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_4_export  : out std_logic_vector(31 downto 0);                    -- export
-            w_external_connection_5_export  : out std_logic_vector(31 downto 0);                    -- export
-            reset_bridge_0_in_reset_reset   : in  std_logic                     := 'X'              -- reset
-        );
-    end component nios_system;
-
+component nios_system is
+  port (
+    ad9361_adc_i0_enable            : out std_logic;                                        --        ad9361_adc_i0.enable
+    ad9361_adc_i0_valid             : out std_logic;                                        --                     .valid
+    ad9361_adc_i0_data              : out std_logic_vector(15 downto 0);                    --                     .data
+    ad9361_adc_i1_enable            : out std_logic;                                        --        ad9361_adc_i1.enable
+    ad9361_adc_i1_valid             : out std_logic;                                        --                     .valid
+    ad9361_adc_i1_data              : out std_logic_vector(15 downto 0);                    --                     .data
+    ad9361_adc_overflow_ovf         : in  std_logic                     := '0';             --  ad9361_adc_overflow.ovf
+    ad9361_adc_q0_enable            : out std_logic;                                        --        ad9361_adc_q0.enable
+    ad9361_adc_q0_valid             : out std_logic;                                        --                     .valid
+    ad9361_adc_q0_data              : out std_logic_vector(15 downto 0);                    --                     .data
+    ad9361_adc_q1_enable            : out std_logic;                                        --        ad9361_adc_q1.enable
+    ad9361_adc_q1_valid             : out std_logic;                                        --                     .valid
+    ad9361_adc_q1_data              : out std_logic_vector(15 downto 0);                    --                     .data
+    ad9361_adc_underflow_unf        : in  std_logic                     := '0';             -- ad9361_adc_underflow.unf
+    ad9361_dac_i0_enable            : out std_logic;                                        --        ad9361_dac_i0.enable
+    ad9361_dac_i0_valid             : out std_logic;                                        --                     .valid
+    ad9361_dac_i0_data              : in  std_logic_vector(15 downto 0) := (others => '0'); --                     .data
+    ad9361_dac_i1_enable            : out std_logic;                                        --        ad9361_dac_i1.enable
+    ad9361_dac_i1_valid             : out std_logic;                                        --                     .valid
+    ad9361_dac_i1_data              : in  std_logic_vector(15 downto 0) := (others => '0'); --                     .data
+    ad9361_dac_overflow_ovf         : in  std_logic                     := '0';             --  ad9361_dac_overflow.ovf
+    ad9361_dac_q0_enable            : out std_logic;                                        --        ad9361_dac_q0.enable
+    ad9361_dac_q0_valid             : out std_logic;                                        --                     .valid
+    ad9361_dac_q0_data              : in  std_logic_vector(15 downto 0) := (others => '0'); --                     .data
+    ad9361_dac_q1_enable            : out std_logic;                                        --        ad9361_dac_q1.enable
+    ad9361_dac_q1_valid             : out std_logic;                                        --                     .valid
+    ad9361_dac_q1_data              : in  std_logic_vector(15 downto 0) := (others => '0'); --                     .data
+    ad9361_dac_sync_in_sync         : in  std_logic                     := '0';             --   ad9361_dac_sync_in.sync
+    ad9361_dac_sync_out_sync        : out std_logic;                                        --  ad9361_dac_sync_out.sync
+    ad9361_dac_underflow_unf        : in  std_logic                     := '0';             -- ad9361_dac_underflow.unf
+    ad9361_data_clock_clk           : out std_logic;                                        --    ad9361_data_clock.clk
+    ad9361_data_reset_reset         : out std_logic;                                        --    ad9361_data_reset.reset
+    ad9361_device_if_rx_clk_in_p    : in  std_logic                     := '0';             --     ad9361_device_if.rx_clk_in_p
+    ad9361_device_if_rx_clk_in_n    : in  std_logic                     := '0';             --                     .rx_clk_in_n
+    ad9361_device_if_rx_frame_in_p  : in  std_logic                     := '0';             --                     .rx_frame_in_p
+    ad9361_device_if_rx_frame_in_n  : in  std_logic                     := '0';             --                     .rx_frame_in_n
+    ad9361_device_if_rx_data_in_p   : in  std_logic_vector(5 downto 0)  := (others => '0'); --                     .rx_data_in_p
+    ad9361_device_if_rx_data_in_n   : in  std_logic_vector(5 downto 0)  := (others => '0'); --                     .rx_data_in_n
+    ad9361_device_if_tx_clk_out_p   : out std_logic;                                        --                     .tx_clk_out_p
+    ad9361_device_if_tx_clk_out_n   : out std_logic;                                        --                     .tx_clk_out_n
+    ad9361_device_if_tx_frame_out_p : out std_logic;                                        --                     .tx_frame_out_p
+    ad9361_device_if_tx_frame_out_n : out std_logic;                                        --                     .tx_frame_out_n
+    ad9361_device_if_tx_data_out_p  : out std_logic_vector(5 downto 0);                     --                     .tx_data_out_p
+    ad9361_device_if_tx_data_out_n  : out std_logic_vector(5 downto 0);                     --                     .tx_data_out_n
+    arbiter_request                 : in  std_logic_vector(1 downto 0)  := (others => '0'); --              arbiter.request
+    arbiter_granted                 : out std_logic_vector(1 downto 0);                     --                     .granted
+    arbiter_ack                     : in  std_logic_vector(1 downto 0)  := (others => '0'); --                     .ack
+    clk_clk                         : in  std_logic                     := '0';             --                  clk.clk
+    command_serial_in               : in  std_logic                     := '0';             --              command.serial_in
+    command_serial_out              : out std_logic;                                        --                     .serial_out
+    dac_MISO                        : in  std_logic                     := '0';             --                  dac.MISO
+    dac_MOSI                        : out std_logic;                                        --                     .MOSI
+    dac_SCLK                        : out std_logic;                                        --                     .SCLK
+    dac_SS_n                        : out std_logic_vector(1 downto 0);                     --                     .SS_n
+    gpio_in_port                    : in  std_logic_vector(31 downto 0) := (others => '0'); --                 gpio.in_port
+    gpio_out_port                   : out std_logic_vector(31 downto 0);                    --                     .out_port
+    gpio_rffe_0_in_port             : in  std_logic_vector(31 downto 0) := (others => '0'); --          gpio_rffe_0.in_port
+    gpio_rffe_0_out_port            : out std_logic_vector(31 downto 0);                    --                     .out_port
+    oc_i2c_scl_pad_o                : out std_logic;                                        --               oc_i2c.scl_pad_o
+    oc_i2c_scl_padoen_o             : out std_logic;                                        --                     .scl_padoen_o
+    oc_i2c_sda_pad_i                : in  std_logic                     := '0';             --                     .sda_pad_i
+    oc_i2c_sda_pad_o                : out std_logic;                                        --                     .sda_pad_o
+    oc_i2c_sda_padoen_o             : out std_logic;                                        --                     .sda_padoen_o
+    oc_i2c_arst_i                   : in  std_logic                     := '0';             --                     .arst_i
+    oc_i2c_scl_pad_i                : in  std_logic                     := '0';             --                     .scl_pad_i
+    reset_reset_n                   : in  std_logic                     := '0';             --                reset.reset_n
+    rx_tamer_ts_sync_in             : in  std_logic                     := '0';             --             rx_tamer.ts_sync_in
+    rx_tamer_ts_sync_out            : out std_logic;                                        --                     .ts_sync_out
+    rx_tamer_ts_pps                 : in  std_logic                     := '0';             --                     .ts_pps
+    rx_tamer_ts_clock               : in  std_logic                     := '0';             --                     .ts_clock
+    rx_tamer_ts_reset               : in  std_logic                     := '0';             --                     .ts_reset
+    rx_tamer_ts_time                : out std_logic_vector(63 downto 0);                    --                     .ts_time
+    rx_trigger_ctl_in_port          : in  std_logic_vector(7 downto 0)  := (others => '0'); --       rx_trigger_ctl.in_port
+    rx_trigger_ctl_out_port         : out std_logic_vector(7 downto 0);                     --                     .out_port
+    spi_MISO                        : in  std_logic                     := '0';             --                  spi.MISO
+    spi_MOSI                        : out std_logic;                                        --                     .MOSI
+    spi_SCLK                        : out std_logic;                                        --                     .SCLK
+    spi_SS_n                        : out std_logic;                                        --                     .SS_n
+    tx_tamer_ts_sync_in             : in  std_logic                     := '0';             --             tx_tamer.ts_sync_in
+    tx_tamer_ts_sync_out            : out std_logic;                                        --                     .ts_sync_out
+    tx_tamer_ts_pps                 : in  std_logic                     := '0';             --                     .ts_pps
+    tx_tamer_ts_clock               : in  std_logic                     := '0';             --                     .ts_clock
+    tx_tamer_ts_reset               : in  std_logic                     := '0';             --                     .ts_reset
+    tx_tamer_ts_time                : out std_logic_vector(63 downto 0);                    --                     .ts_time
+    tx_trigger_ctl_in_port          : in  std_logic_vector(7 downto 0)  := (others => '0'); --       tx_trigger_ctl.in_port
+    tx_trigger_ctl_out_port         : out std_logic_vector(7 downto 0);                     --                     .out_port
+    w_1_i_export                    : out std_logic_vector(31 downto 0);                    --                w_1_i.export
+    w_1_q_export                    : out std_logic_vector(31 downto 0);                    --                w_1_q.export
+    wbm_wb_clk_i                    : in  std_logic                     := '0';             --                  wbm.wb_clk_i
+    wbm_wb_rst_i                    : in  std_logic                     := '0';             --                     .wb_rst_i
+    wbm_wb_adr_o                    : out std_logic_vector(31 downto 0);                    --                     .wb_adr_o
+    wbm_wb_dat_o                    : out std_logic_vector(31 downto 0);                    --                     .wb_dat_o
+    wbm_wb_dat_i                    : in  std_logic_vector(31 downto 0) := (others => '0'); --                     .wb_dat_i
+    wbm_wb_we_o                     : out std_logic;                                        --                     .wb_we_o
+    wbm_wb_sel_o                    : out std_logic;                                        --                     .wb_sel_o
+    wbm_wb_stb_o                    : out std_logic;                                        --                     .wb_stb_o
+    wbm_wb_ack_i                    : in  std_logic                     := '0';             --                     .wb_ack_i
+    wbm_wb_cyc_o                    : out std_logic;                                        --                     .wb_cyc_o
+    xb_gpio_in_port                 : in  std_logic_vector(31 downto 0) := (others => '0'); --              xb_gpio.in_port
+    xb_gpio_out_port                : out std_logic_vector(31 downto 0);                    --                     .out_port
+    xb_gpio_dir_export              : out std_logic_vector(31 downto 0)                     --          xb_gpio_dir.export
+  );
+end component;-- nios_system;
 
     signal tx_packet_control      : packet_control_t ;
     signal rx_packet_control      : packet_control_t := PACKET_CONTROL_DEFAULT ;
@@ -293,6 +287,16 @@ architecture iurie_bladerf of bladerf is
     signal tx_packet_empty        : std_logic;
 
 
+    signal wbm_wb_clk_i           : std_logic;
+    signal wbm_wb_rst_i           : std_logic;
+    signal wbm_wb_adr_o           : std_logic_vector(31 downto 0);
+    signal wbm_wb_dat_o           : std_logic_vector(31 downto 0);
+    signal wbm_wb_dat_i           : std_logic_vector(31 downto 0);
+    signal wbm_wb_we_o            : std_logic;
+    signal wbm_wb_sel_o           : std_logic;
+    signal wbm_wb_stb_o           : std_logic;
+    signal wbm_wb_ack_i           : std_logic;
+    signal wbm_wb_cyc_o           : std_logic;
 begin
 
     U_rx_pkt_gen : entity work.rx_packet_generator
@@ -567,13 +571,18 @@ begin
             tx_trigger_ctl_out_port         => tx_trigger_ctl_i,
             rx_trigger_ctl_in_port          => pack(rx_trigger_ctl),
             tx_trigger_ctl_in_port          => pack(tx_trigger_ctl),
-            w_external_connection_export    => w1i,    --   w_external_connection.export
-            w_external_connection_1_export  => w1q,  -- w_external_connection_1.export
-            w_external_connection_2_export  => w2i,  -- w_external_connection_2.export
-            w_external_connection_3_export  => w2q,  -- w_external_connection_3.export
-            w_external_connection_4_export  => w3i,  -- w_external_connection_4.export
-            w_external_connection_5_export  => w3q,  -- w_external_connection_5.export
-            reset_bridge_0_in_reset_reset   => '0'-- reset_bridge_0_in_reset.reset
+w_1_i_export => w1i,
+w_1_q_export => w1q,
+            wbm_wb_clk_i                    => wbm_wb_clk_i,
+            wbm_wb_rst_i                    => wbm_wb_rst_i,
+            wbm_wb_adr_o                    => wbm_wb_adr_o,
+            wbm_wb_dat_o                    => wbm_wb_dat_o,
+            wbm_wb_dat_i                    => wbm_wb_dat_i,
+            wbm_wb_we_o                     => wbm_wb_we_o,
+            wbm_wb_sel_o                    => wbm_wb_sel_o,
+            wbm_wb_stb_o                    => wbm_wb_stb_o,
+            wbm_wb_ack_i                    => wbm_wb_ack_i,
+            wbm_wb_cyc_o                    => wbm_wb_cyc_o
         );
 
     -- FX3 UART
