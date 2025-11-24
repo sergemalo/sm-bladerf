@@ -8,6 +8,7 @@ set opencores_ip [file normalize [file join $here ../../ip/opencores]]
 
 # Altera IP
 set_global_assignment -name VHDL_FILE    [file normalize [file join $altera_ip common_dcfifo/common_dcfifo.vhd]]
+set_global_assignment -name VHDL_FILE    [file normalize [file join $altera_ip clk_ctrl/clk_ctrl.vhd]]
 set_global_assignment -name VHDL_FILE    [file normalize [file join $here      vhdl/wrappers/tx_fifo.vhd]]
 set_global_assignment -name VHDL_FILE    [file normalize [file join $here      vhdl/wrappers/tx_meta_fifo.vhd]]
 set_global_assignment -name VHDL_FILE    [file normalize [file join $here      vhdl/wrappers/rx_fifo.vhd]]
@@ -27,18 +28,18 @@ set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip synth
 set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip synthesis/fifo_reader.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip synthesis/fifo_writer.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip synthesis/set_clear_ff.vhd]]
+set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip synthesis/rx_packet_generator.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip trigger/trigger.vhd]]
 set_global_assignment -name QIP_FILE  [file normalize [file join $nuand_ip pll_reset/pll_reset.qip]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $nuand_ip ps_sync/vhdl/ps_sync.vhd]]
-set_global_assignment -name QIP_FILE  [file normalize [file join $nuand_ip tone_generator/tone_generator.qip]]
 
 # Implementation Details
 set_global_assignment -name VHDL_FILE [file normalize [file join $common_dir vhdl/fx3_gpif_p.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $common_dir vhdl/fx3_gpif.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $here vhdl/tx.vhd]]
 set_global_assignment -name VHDL_FILE [file normalize [file join $here vhdl/rx.vhd]]
-set_global_assignment -name VHDL_FILE [file normalize [file join $here vhdl/bladerf-foxhunt.vhd]]
+set_global_assignment -name VHDL_FILE [file normalize [file join $here vhdl/bladerf-iurie.vhd]]
 set_global_assignment -name QIP_FILE  [file normalize nios_system/synthesis/nios_system.qip]
 
 # Explicitly include Nios mem_init
-set_global_assignment -name QIP_FILE [file normalize foxhunt/mem_init/meminit.qip]
+set_global_assignment -name QIP_FILE [file normalize bladeRF_nios/mem_init/meminit.qip]
