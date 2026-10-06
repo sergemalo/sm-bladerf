@@ -1,1 +1,1 @@
- /home/serge/w/crpa/bladeRF/hdl/quartus/build_bladerf.sh -b bladeRF-micro -r hosted -s A4
+ /home/serge/w/crpa/sm-bladerf/hdl/quartus/build_bladerf.sh -b bladeRF-micro -r hosted -s A4
